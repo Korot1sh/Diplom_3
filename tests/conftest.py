@@ -4,11 +4,13 @@ import allure
 import pytest
 import requests
 
-
-BASE_URL = "https://qa-stellarburgers.education-services.ru"
-REGISTER_ENDPOINT = "/api/auth/register"
-LOGIN_ENDPOINT = "/api/auth/login"
-USER_ENDPOINT = "/api/auth/user"
+from tests.constants import (
+    BASE_URL,
+    INGREDIENTS_ENDPOINT,
+    LOGIN_ENDPOINT,
+    REGISTER_ENDPOINT,
+    USER_ENDPOINT,
+)
 
 
 def unique_user():
@@ -66,7 +68,7 @@ def created_user():
 @pytest.fixture
 def ingredients():
     response = requests.get(
-        f"{BASE_URL}/api/ingredients",
+        f"{BASE_URL}{INGREDIENTS_ENDPOINT}",
         timeout=20,
     )
     assert response.status_code == 200, response.text

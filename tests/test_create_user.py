@@ -2,7 +2,8 @@ import allure
 import pytest
 import requests
 
-from tests.conftest import BASE_URL, REGISTER_ENDPOINT, unique_user, register_user
+from tests.constants import BASE_URL, REGISTER_ENDPOINT, USER_ENDPOINT
+from tests.conftest import register_user, unique_user
 
 
 @allure.epic("Stellar Burgers API")
@@ -28,7 +29,7 @@ class TestCreateUser:
         finally:
             if access_token:
                 delete_response = requests.delete(
-                    f"{BASE_URL}/api/auth/user",
+                    f"{BASE_URL}{USER_ENDPOINT}",
                     headers={"Authorization": access_token},
                     timeout=20,
                 )

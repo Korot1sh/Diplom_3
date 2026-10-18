@@ -1,7 +1,7 @@
 import allure
 import requests
 
-from tests.conftest import BASE_URL, LOGIN_ENDPOINT
+from tests.constants import BASE_URL, LOGIN_ENDPOINT
 
 
 @allure.epic("Stellar Burgers API")

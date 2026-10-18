@@ -2,7 +2,8 @@ import allure
 import pytest
 import requests
 
-from tests.conftest import BASE_URL, USER_ENDPOINT, unique_user
+from tests.constants import BASE_URL, LOGIN_ENDPOINT, USER_ENDPOINT
+from tests.conftest import unique_user
 
 
 @allure.epic("Stellar Burgers API")
@@ -35,7 +36,7 @@ class TestUpdateUser:
 
         if field == "password":
             login_response = requests.post(
-                f"{BASE_URL}/api/auth/login",
+                f"{BASE_URL}{LOGIN_ENDPOINT}",
                 json={"email": user["email"], "password": new_value},
                 timeout=20,
             )

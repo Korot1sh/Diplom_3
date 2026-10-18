@@ -1,10 +1,7 @@
 import allure
 import requests
 
-from tests.conftest import BASE_URL
-
-
-ORDERS_ENDPOINT = "/api/orders"
+from tests.constants import BASE_URL, ORDERS_ENDPOINT
 
 
 @allure.epic("Stellar Burgers API")
