@@ -29,20 +29,21 @@ def driver(request):
     browser.quit()
 
 
-@pytest.fixture
-def user():
+def make_user():
     email = f"diplom_{uuid.uuid4().hex[:10]}@example.com"
     password = "Qwerty12345!"
     name = "Diplom Test"
-    response = requests.post(
-        f"{API_URL}/auth/register",
-        json={"email": email, "password": password, "name": name},
-        timeout=15,
-    )
+    return {"email": email, "password": password, "name": name}
+
+
+@pytest.fixture
+def user():
+    data = make_user()
+    response = requests.post(f"{API_URL}/auth/register", json=data, timeout=15)
     response.raise_for_status()
-    data = response.json()
-    yield {"email": email, "password": password, "name": name, "token": data.get("accessToken")}
-    token = data.get("accessToken", "")
+    body = response.json()
+    token = body["accessToken"]
+    yield {**data, "token": token}
     try:
         requests.delete(f"{API_URL}/auth/user", headers={"Authorization": token}, timeout=15)
     except requests.RequestException:
@@ -53,3 +54,25 @@ def user():
 def logged_in(driver, user):
     LoginPage(driver).login(user["email"], user["password"])
     return user
+
+
+# Legacy API fixtures are kept so the repository's original API checks can run too.
+@pytest.fixture
+def created_user():
+    data = make_user()
+    response = requests.post(f"{API_URL}/auth/register", json=data, timeout=15)
+    response.raise_for_status()
+    body = response.json()
+    token = body["accessToken"]
+    yield data, token
+    try:
+        requests.delete(f"{API_URL}/auth/user", headers={"Authorization": token}, timeout=15)
+    except requests.RequestException:
+        pass
+
+
+@pytest.fixture
+def ingredients():
+    response = requests.get(f"{API_URL}/ingredients", timeout=15)
+    response.raise_for_status()
+    return [item["_id"] for item in response.json()["data"][:2]]
