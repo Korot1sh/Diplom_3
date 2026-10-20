@@ -1,80 +1,55 @@
+import os
 import uuid
 
-import allure
 import pytest
 import requests
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
-from tests.constants import (
-    BASE_URL,
-    INGREDIENTS_ENDPOINT,
-    LOGIN_ENDPOINT,
-    REGISTER_ENDPOINT,
-    USER_ENDPOINT,
-)
+from pages.login_page import LoginPage
 
-
-def unique_user():
-    suffix = uuid.uuid4().hex
-    return {
-        "email": f"api_test_{suffix}@example.com",
-        "password": f"TestPassword_{suffix}",
-        "name": f"Api Test {suffix}",
-    }
+BASE_URL = os.getenv("BASE_URL", "https://qa-stellarburgers.education-services.ru")
+API_URL = os.getenv("API_URL", BASE_URL.rstrip("/") + "/api")
 
 
-def register_user(user):
-    response = requests.post(
-        f"{BASE_URL}{REGISTER_ENDPOINT}",
-        json=user,
-        timeout=20,
-    )
-    return response
-
-
-def login_user(user):
-    response = requests.post(
-        f"{BASE_URL}{LOGIN_ENDPOINT}",
-        json={"email": user["email"], "password": user["password"]},
-        timeout=20,
-    )
-    return response
-
-
-def delete_user(access_token):
-    return requests.delete(
-        f"{BASE_URL}{USER_ENDPOINT}",
-        headers={"Authorization": access_token},
-        timeout=20,
-    )
+@pytest.fixture(params=["chrome", "firefox"])
+def driver(request):
+    if request.param == "chrome":
+        options = ChromeOptions()
+        options.add_argument("--window-size=1440,1000")
+        browser = webdriver.Chrome(options=options)
+    else:
+        options = FirefoxOptions()
+        options.add_argument("--width=1440")
+        options.add_argument("--height=1000")
+        browser = webdriver.Firefox(options=options)
+    browser.get(BASE_URL)
+    yield browser
+    browser.quit()
 
 
 @pytest.fixture
-def created_user():
-    user = unique_user()
-    response = register_user(user)
-    assert response.status_code == 200, response.text
-
-    body = response.json()
-    assert body["success"] is True
-    access_token = body["accessToken"]
-
-    yield user, access_token
-
-    with allure.step("Удалить тестового пользователя"):
-        delete_response = delete_user(access_token)
-        assert delete_response.status_code in (200, 202), delete_response.text
+def user():
+    email = f"diplom_{uuid.uuid4().hex[:10]}@example.com"
+    password = "Qwerty12345!"
+    name = "Diplom Test"
+    response = requests.post(
+        f"{API_URL}/auth/register",
+        json={"email": email, "password": password, "name": name},
+        timeout=15,
+    )
+    response.raise_for_status()
+    data = response.json()
+    yield {"email": email, "password": password, "name": name, "token": data.get("accessToken")}
+    token = data.get("accessToken", "")
+    try:
+        requests.delete(f"{API_URL}/auth/user", headers={"Authorization": token}, timeout=15)
+    except requests.RequestException:
+        pass
 
 
 @pytest.fixture
-def ingredients():
-    response = requests.get(
-        f"{BASE_URL}{INGREDIENTS_ENDPOINT}",
-        timeout=20,
-    )
-    assert response.status_code == 200, response.text
-
-    body = response.json()
-    assert body["success"] is True
-    assert body["data"]
-
-    return [item["_id"] for item in body["data"][:2]]
+def logged_in(driver, user):
+    LoginPage(driver).login(user["email"], user["password"])
+    return user
