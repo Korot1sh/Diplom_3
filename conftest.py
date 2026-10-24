@@ -1,14 +1,14 @@
-import pytest
 import allure
+import pytest
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 
+from pages.account_page import AccountPage
+from pages.login_page import LoginPage
 from utils.api_client import StellarApi
+from utils.constants import BASE_URL
 from utils.test_data import unique_user
-
-
-BASE_URL = "https://qa-stellarburgers.education-services.ru"
 
 
 def pytest_addoption(parser):
@@ -26,6 +26,7 @@ def _driver(browser):
         options = ChromeOptions()
         options.add_argument("--window-size=1440,1000")
         return webdriver.Chrome(options=options)
+
     options = FirefoxOptions()
     options.add_argument("--width=1440")
     options.add_argument("--height=1000")
@@ -61,10 +62,12 @@ def api(base_url):
 def user(api):
     data = unique_user()
     body = api.register(data)
-    token = body["accessToken"]
-    user_data = {"data": data, "token": token}
+    assert body["success"], body
+    user_data = {"data": data, "token": body["accessToken"]}
+
     yield user_data
-    response = api.delete_user(token)
+
+    response = api.delete_user(user_data["token"])
     if response.status_code not in (200, 202):
         allure.attach(
             response.text,
@@ -75,8 +78,6 @@ def user(api):
 
 @pytest.fixture
 def auth_context(driver, base_url, user):
-    from pages.login_page import LoginPage
-    
     login = LoginPage(driver)
     login.open_login(base_url)
     login.login(user["data"]["email"], user["data"]["password"])
@@ -87,6 +88,6 @@ def auth_context(driver, base_url, user):
 @pytest.fixture
 def order_ingredients(api):
     ingredients = api.ingredients()
-    bun = next(x for x in ingredients if x["type"] == "bun")
-    filling = next(x for x in ingredients if x["type"] != "bun")
+    bun = next(item for item in ingredients if item["type"] == "bun")
+    filling = next(item for item in ingredients if item["type"] != "bun")
     return [bun["_id"], filling["_id"]], bun["name"], filling["name"]

@@ -1,10 +1,13 @@
 import allure
-from .base_page import BasePage
+
 from locators import login_locators as L
+from utils.constants import LOGIN_PATH
+
+from .base_page import BasePage
 
 
 class LoginPage(BasePage):
-    URL = "/login"
+    URL = LOGIN_PATH
 
     @allure.step("Открыть страницу входа")
     def open_login(self, base_url):

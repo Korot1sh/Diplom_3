@@ -1,10 +1,13 @@
 import allure
-from .base_page import BasePage
+
 from locators import forgot_password_locators as L
+from utils.constants import FORGOT_PASSWORD_PATH
+
+from .base_page import BasePage
 
 
 class ForgotPasswordPage(BasePage):
-    URL = "/forgot-password"
+    URL = FORGOT_PASSWORD_PATH
 
     @allure.step("Открыть страницу восстановления пароля")
     def open_page(self, base_url):

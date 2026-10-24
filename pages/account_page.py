@@ -1,10 +1,13 @@
 import allure
-from .base_page import BasePage
+
 from locators import account_locators as L
+from utils.constants import ACCOUNT_PATH
+
+from .base_page import BasePage
 
 
 class AccountPage(BasePage):
-    URL = "/account"
+    URL = ACCOUNT_PATH
 
     @allure.step("Открыть личный кабинет")
     def open_account(self, base_url):

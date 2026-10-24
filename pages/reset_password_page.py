@@ -1,10 +1,13 @@
 import allure
-from .base_page import BasePage
+
 from locators import reset_password_locators as L
+from utils.constants import RESET_PASSWORD_PATH
+
+from .base_page import BasePage
 
 
 class ResetPasswordPage(BasePage):
-    URL = "/reset-password"
+    URL = RESET_PASSWORD_PATH
 
     @allure.step("Открыть страницу установки нового пароля")
     def open_page(self, base_url):

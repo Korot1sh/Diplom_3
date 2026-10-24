@@ -1,7 +1,9 @@
 import allure
-from pages.login_page import LoginPage
+
 from pages.forgot_password_page import ForgotPasswordPage
+from pages.login_page import LoginPage
 from pages.reset_password_page import ResetPasswordPage
+from utils.constants import FORGOT_PASSWORD_PATH, RESET_PASSWORD_PATH
 
 
 @allure.epic("Stellar Burgers")
@@ -14,7 +16,7 @@ class TestPasswordRecovery:
         login = LoginPage(driver)
         login.open_login(base_url)
         login.open_password_recovery()
-        ForgotPasswordPage(driver).url_contains("/forgot-password")
+        assert ForgotPasswordPage(driver).url_contains(FORGOT_PASSWORD_PATH)
 
     @allure.title("Ввод email и отправка запроса на восстановление")
     @allure.story("Восстановление пароля")
@@ -23,7 +25,7 @@ class TestPasswordRecovery:
         page.open_page(base_url)
         page.enter_email(user["data"]["email"])
         page.recover()
-        ResetPasswordPage(driver).url_contains("/reset-password")
+        assert ResetPasswordPage(driver).url_contains(RESET_PASSWORD_PATH)
 
     @allure.title("Клик по показать/скрыть пароль активирует поле пароля")
     @allure.story("Восстановление пароля")

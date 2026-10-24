@@ -1,0 +1,15 @@
+BASE_URL = "https://qa-stellarburgers.education-services.ru"
+
+LOGIN_PATH = "/login"
+ACCOUNT_PATH = "/account"
+ORDER_HISTORY_PATH = "/account/order-history"
+FORGOT_PASSWORD_PATH = "/forgot-password"
+RESET_PASSWORD_PATH = "/reset-password"
+CONSTRUCTOR_PATH = "/"
+FEED_PATH = "/feed"
+
+API_REGISTER = "/api/auth/register"
+API_LOGIN = "/api/auth/login"
+API_USER = "/api/auth/user"
+API_INGREDIENTS = "/api/ingredients"
+API_ORDERS = "/api/orders"

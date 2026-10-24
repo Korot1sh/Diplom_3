@@ -1,6 +1,7 @@
 import allure
-from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
 
 class BasePage:
@@ -20,6 +21,14 @@ class BasePage:
     def wait_clickable(self, locator):
         return self.wait.until(EC.element_to_be_clickable(locator))
 
+    @allure.step("Найти элемент")
+    def find(self, locator):
+        return self.driver.find_element(*locator)
+
+    @allure.step("Найти элементы")
+    def find_all(self, locator):
+        return self.driver.find_elements(*locator)
+
     @allure.step("Кликнуть по элементу")
     def click(self, locator):
         self.wait_clickable(locator).click()
@@ -30,7 +39,30 @@ class BasePage:
 
     @allure.step("Проверить URL")
     def url_contains(self, value):
-        self.wait.until(lambda d: value in d.current_url)
+        return bool(self.wait.until(lambda driver: value in driver.current_url))
+
+    @allure.step("Проверить точный URL")
+    def url_is(self, url):
+        return bool(self.wait.until(lambda driver: driver.current_url.rstrip("/") == url.rstrip("/")))
+
+    @allure.step("Обновить страницу")
+    def refresh(self):
+        self.driver.refresh()
+
+    @allure.step("Прокрутить к элементу")
+    def scroll_into_view(self, element):
+        self.driver.execute_script(
+            "arguments[0].scrollIntoView({block:'center'});",
+            element,
+        )
+
+    @allure.step("Перетащить элемент")
+    def drag_and_drop(self, source, target):
+        ActionChains(self.driver).drag_and_drop(source, target).perform()
+
+    @allure.step("Проверить наличие элементов")
+    def has_elements(self, locator):
+        return bool(self.find_all(locator))
 
     @allure.step("Проверить, что модальное окно исчезло")
     def wait_modal_closed(self, locator):

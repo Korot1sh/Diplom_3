@@ -1,7 +1,9 @@
 import allure
-from selenium.webdriver.common.action_chains import ActionChains
-from .base_page import BasePage
+
 from locators import constructor_locators as L
+from utils.constants import CONSTRUCTOR_PATH
+
+from .base_page import BasePage
 
 
 class ConstructorPage(BasePage):
@@ -14,14 +16,13 @@ class ConstructorPage(BasePage):
         self.click(L.FEED_LINK)
 
     def _ingredient(self, name):
-        return self.driver.find_element(
-            L.INGREDIENT_CARD[0], L.INGREDIENT_CARD[1].format(name=name)
-        )
+        locator = (L.INGREDIENT_CARD[0], L.INGREDIENT_CARD[1].format(name=name))
+        return self.find(locator)
 
     @allure.step("Открыть детали ингредиента {name}")
     def open_ingredient(self, name):
         card = self._ingredient(name)
-        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", card)
+        self.scroll_into_view(card)
         card.click()
 
     @allure.step("Получить название ингредиента в модальном окне")
@@ -33,21 +34,23 @@ class ConstructorPage(BasePage):
         self.click(L.MODAL_CLOSE)
         self.wait_modal_closed(L.MODAL)
 
+    @allure.step("Проверить, что модальное окно закрыто")
+    def modal_is_closed(self):
+        return not self.has_elements(L.MODAL)
+
     @allure.step("Получить каунтер ингредиента {name}")
     def ingredient_counter(self, name):
         card = self._ingredient(name)
-        try:
-            return int(card.find_element(*L.INGREDIENT_COUNTER).text)
-        except Exception:
-            return 0
+        counters = card.find_elements(*L.INGREDIENT_COUNTER)
+        return int(counters[0].text) if counters and counters[0].text else 0
 
     @allure.step("Добавить ингредиент {name} в заказ")
     def add_ingredient(self, name):
         source = self._ingredient(name)
         target = self.wait_visible(L.CONSTRUCTOR_AREA)
-        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", source)
-        self.driver.execute_script("arguments[0].scrollIntoView({block:'center'});", target)
-        ActionChains(self.driver).drag_and_drop(source, target).perform()
+        self.scroll_into_view(source)
+        self.scroll_into_view(target)
+        self.drag_and_drop(source, target)
 
     @allure.step("Оформить заказ")
     def place_order(self):
@@ -56,5 +59,8 @@ class ConstructorPage(BasePage):
     @allure.step("Получить номер заказа из модального окна")
     def order_number(self):
         text = self.text(L.ORDER_MODAL_NUMBER)
-        digits = "".join(ch for ch in text if ch.isdigit())
-        return digits
+        return "".join(ch for ch in text if ch.isdigit())
+
+    @allure.step("Открыть конструктор по URL")
+    def open_constructor_page(self, base_url):
+        self.open(base_url + CONSTRUCTOR_PATH)

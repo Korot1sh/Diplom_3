@@ -1,10 +1,13 @@
 import allure
-from .base_page import BasePage
+
 from locators import feed_locators as L
+from utils.constants import FEED_PATH
+
+from .base_page import BasePage
 
 
 class FeedPage(BasePage):
-    URL = "/feed"
+    URL = FEED_PATH
 
     @allure.step("Открыть ленту заказов")
     def open_feed(self, base_url):
@@ -52,7 +55,7 @@ class FeedPage(BasePage):
         locator = (
             "xpath",
             f"//*[contains(normalize-space(), 'В работе') and "
-            f".//*[contains(normalize-space(), '{number}')]]"
+            f".//*[contains(normalize-space(), '{number}')]]",
         )
         self.wait_visible(locator)
         return True
