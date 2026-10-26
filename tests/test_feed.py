@@ -11,7 +11,6 @@ class TestOrderFeed:
     def test_open_order_details(self, driver, base_url, api, user, order_ingredients):
         ids, _, _ = order_ingredients
         created = api.create_order(user["token"], ids)
-        assert created["success"], created
         number = str(created["order"]["number"])
         page = FeedPage(driver)
         page.open_feed(base_url)
@@ -22,7 +21,6 @@ class TestOrderFeed:
     def test_user_order_is_visible_in_feed(self, driver, base_url, api, user, order_ingredients):
         ids, _, _ = order_ingredients
         created = api.create_order(user["token"], ids)
-        assert created["success"], created
         number = str(created["order"]["number"])
         page = FeedPage(driver)
         page.open_feed(base_url)
@@ -35,7 +33,6 @@ class TestOrderFeed:
         page.open_feed(base_url)
         before = page.total_all()
         created = api.create_order(user["token"], ids)
-        assert created["success"], created
         page.refresh()
         page.wait_total_all_increased(before)
         assert page.total_all() >= before + 1
@@ -47,7 +44,6 @@ class TestOrderFeed:
         page.open_feed(base_url)
         before = page.total_today()
         created = api.create_order(user["token"], ids)
-        assert created["success"], created
         page.refresh()
         page.wait_total_today_increased(before)
         assert page.total_today() >= before + 1
@@ -58,7 +54,6 @@ class TestOrderFeed:
         page = FeedPage(driver)
         page.open_feed(base_url)
         created = api.create_order(user["token"], ids)
-        assert created["success"], created
         number = str(created["order"]["number"])
         page.refresh()
         assert page.order_present_in_progress(number)

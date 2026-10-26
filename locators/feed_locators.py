@@ -14,3 +14,15 @@ MODAL_ORDER_NUMBER = (
     By.CSS_SELECTOR,
     "div[class*='Modal_modal'] h2, div[class*='Modal_modal'] [class*='OrderDetails_number']"
 )
+
+
+def order_by_number(number):
+    return (By.XPATH, f"//*[contains(normalize-space(), '{number}')]")
+
+
+def order_in_progress(number):
+    return (
+        By.XPATH,
+        f"//*[contains(normalize-space(), 'В работе') and "
+        f".//*[contains(normalize-space(), '{number}')]]",
+    )

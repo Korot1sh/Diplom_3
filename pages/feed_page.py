@@ -31,8 +31,7 @@ class FeedPage(BasePage):
 
     @allure.step("Открыть заказ по номеру {number}")
     def open_order_by_number(self, number):
-        locator = ("xpath", f"//*[contains(normalize-space(), '{number}')]")
-        self.click(locator)
+        self.click(L.order_by_number(number))
 
     @allure.step("Получить номер заказа из модального окна")
     def modal_order_number(self):
@@ -46,16 +45,10 @@ class FeedPage(BasePage):
 
     @allure.step("Дождаться номера заказа в ленте")
     def order_present(self, number):
-        locator = ("xpath", f"//*[contains(normalize-space(), '{number}')]")
-        self.wait_visible(locator)
+        self.wait_visible(L.order_by_number(number))
         return True
 
     @allure.step("Дождаться номера заказа в блоке «В работе»")
     def order_present_in_progress(self, number):
-        locator = (
-            "xpath",
-            f"//*[contains(normalize-space(), 'В работе') and "
-            f".//*[contains(normalize-space(), '{number}')]]",
-        )
-        self.wait_visible(locator)
+        self.wait_visible(L.order_in_progress(number))
         return True
